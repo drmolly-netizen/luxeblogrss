@@ -6,7 +6,8 @@ on:
   workflow_dispatch:          # manual "Run workflow" button
   push:
     branches: [main]
-
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 permissions:
   contents: read
   pages: write
