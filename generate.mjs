@@ -122,6 +122,12 @@ const canonicalFor = (a) => config.canonicalBase
 const urlFor = (a) => `${SITE_URL}/${a.outSlug}/`;
 
 const css = await readFile(path.join(__dirname, 'style.css'), 'utf8');
+// Logo + favicon are optional files sitting next to this script; copy them into the site if present.
+let logoW = 112, logoH = 165; // display size (the logo image is 280x412, shown smaller so it stays sharp on high-resolution screens)
+for (const f of ['logo.png', 'favicon.png']) {
+  if (existsSync(path.join(__dirname, f))) await copyFile(path.join(__dirname, f), path.join(OUT, f));
+  else console.warn(`Note: ${f} not found - upload it to the repo to show your logo.`);
+}
 const shell = ({ title, desc, canonical, body, jsonld, ogImage, ogType = 'website' }) => `<!doctype html>
 <html lang="en-AU">
 <head>
@@ -136,18 +142,25 @@ const shell = ({ title, desc, canonical, body, jsonld, ogImage, ogType = 'websit
 <meta property="og:type" content="${ogType}">
 <meta property="og:url" content="${esc(canonical)}">
 ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}">` : ''}
+<link rel="icon" type="image/png" href="${SITE_URL}/favicon.png">
+<link rel="apple-touch-icon" href="${SITE_URL}/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
 <style>${css}</style>
 ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script>` : ''}
 </head>
 <body>
-<header class="site"><div class="wrap">
-  <a class="brand" href="${esc(config.mainSiteUrl)}">${esc(config.brandName)}</a>
-  <nav><a href="${esc(config.mainSiteUrl)}">Main site</a><a href="${SITE_URL}/">Blog</a><a class="rss" href="${SITE_URL}/feed.xml">RSS</a></nav>
-</div></header>
+<header class="site">
+  <div class="masthead"><a class="logo-link" href="${esc(config.mainSiteUrl)}" aria-label="${esc(config.brandName)} - visit our main website"><img src="${SITE_URL}/logo.png" alt="${esc(config.brandName)}" width="${logoW}" height="${logoH}"></a></div>
+  <nav class="wrap"><a href="${esc(config.mainSiteUrl)}">Main website</a><a href="${SITE_URL}/">Blog</a><a class="rss" href="${SITE_URL}/feed.xml">RSS</a></nav>
+</header>
 <main class="wrap">${body}</main>
 <footer class="site"><div class="wrap">
-  <p>${esc(config.footerNote)}</p>
-  <p><a href="${SITE_URL}/feed.xml">Subscribe via RSS</a> &middot; <a href="${esc(config.mainSiteUrl)}">${esc(config.brandName)}</a></p>
+  <p class="foot-brand"><a href="${esc(config.mainSiteUrl)}">${esc(config.brandName)}</a></p>
+  ${config.contactLine ? `<p>${esc(config.contactLine)}</p>` : ''}
+  <p class="foot-note">${esc(config.footerNote)}</p>
+  <p><a href="${SITE_URL}/feed.xml">Subscribe via RSS</a></p>
 </div></footer>
 </body></html>`;
 
@@ -177,6 +190,7 @@ for (const a of articles) {
 ${a.image ? `<img class="hero" src="${esc(a.image)}" alt="${esc(a.title)}">` : ''}
 <div class="content">${a.content}</div>
 </article>
+<p class="mainlink"><a href="${esc(config.mainSiteUrl)}">Visit ${esc(config.brandName)} &rarr;</a></p>
 ${config.disclaimer ? `<aside class="disclaimer">${esc(config.disclaimer)}</aside>` : ''}`;
   await writeFile(path.join(dir, 'index.html'), shell({
     title: `${a.title} | ${config.brandName}`, desc: a.excerpt, canonical: canonicalFor(a), body, ogImage: a.image, ogType: 'article',
