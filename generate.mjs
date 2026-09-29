@@ -121,7 +121,7 @@ const canonicalFor = (a) => config.canonicalBase
   : `${SITE_URL}/${a.outSlug}/`;
 const urlFor = (a) => `${SITE_URL}/${a.outSlug}/`;
 
-const css = await readFile(path.join(__dirname, 'template', 'style.css'), 'utf8');
+const css = await readFile(path.join(__dirname, 'style.css'), 'utf8');
 const shell = ({ title, desc, canonical, body, jsonld, ogImage, ogType = 'website' }) => `<!doctype html>
 <html lang="en-AU">
 <head>
